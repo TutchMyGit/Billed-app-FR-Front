@@ -166,6 +166,9 @@ export default class {
           date: doc.date,
           status: doc.status
         }))
+        bills.sort(function(a,b) {
+          return new Date(a.date) - new Date(b.date)
+        })
         return bills
       })
       .catch(error => {
