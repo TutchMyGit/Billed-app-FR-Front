@@ -145,12 +145,16 @@ export default class {
       this.counter ++
     }
 
-    bills.forEach(bill => {
-      $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
-    })
+    filteredBills(bills, getStatus(this.index)).forEach(bill =>[
+      bills.forEach(bill => {
+        // Prevent wrong propagation
+        $(`#open-bill${bill.id}`).off("click")
+        $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
+      })
+    ])
 
     return bills
-
+  
   }
 
   getBillsAllUsers = () => {
@@ -166,8 +170,9 @@ export default class {
           date: doc.date,
           status: doc.status
         }))
+        // Ci-dessous : Permet de triier les bills par ordre décroissant (Inverser b.date et a.date pour triier par ordre croissant)
         bills.sort(function(a,b) {
-          return new Date(a.date) - new Date(b.date)
+          return new Date(b.date) - new Date(a.date)
         })
         return bills
       })
