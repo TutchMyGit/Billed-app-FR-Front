@@ -37,7 +37,64 @@ describe("Given I am connected as an employee", () => {
       const antiChrono = (a, b) => ((a < b) ? 1 : +1)
       const datesSorted = [...dates].sort(antiChrono)
       expect(dates).toEqual(datesSorted)
+    });
+    test("Then the Bills are show", async () => {
+
+      localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.append(root)
+      router()
+
+      window.onNavigate(ROUTES_PATH.Bills)
+      await waitFor(() => screen.getByText("Mes notes de frais"))
+
+      expect(screen.getByText("Mes notes de frais")).toBeTruthy()
     })
+    test("Then the newBills button is show", async () => {
+
+      localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.append(root)
+      router()
+      const billContainer = new Bills({
+        document, 
+        onNavigate,
+        localStorage: window.localStorage
+      })
+
+      window.onNavigate(ROUTES_PATH.Bills)
+      const button = screen.getByTestId("btn-new-bill")
+      expect(button).toBeTruthy()
+
+      const handleClickNewBill = jest.fn(billContainer.handleClickNewBill);
+      button.addEventListener('click', handleClickNewBill)
+      fireEvent.click(button)
+      expect(handleClickNewBill).toHaveBeenCalled()
+    })
+    test('Then new bill button should be displayed', () => {
+      window.localStorage.setItem("user", JSON.stringify({
+        type: 'Employee'
+      }))
+
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({
+          pathname
+        })
+      }
+
+      const allBills = new Bills({
+        document,
+        onNavigate,
+        localStorage: window.localStorage,
+      });
+
+      const html = BillsUI({ data: allBills})
+      document.body.innerHTML = html;
+
+      expect(screen.getAllByText("Nouvelle note de frais")).toBeTruthy();
+    });
   })
 })
 
@@ -45,7 +102,7 @@ describe("Given I am connected as an employee", () => {
 
 describe("When the page is loading", () => {
   test("Then i should go to the loading page", () => {
-    const html = BillsUI({data: [], loading: true});
+    const html = BillsUI({data: bills, loading: true});
     document.body.innerHTML = html;
 
     expect(screen.getAllByText("Loading...")).toBeTruthy()
@@ -92,6 +149,7 @@ describe("Given I am connected as an employee and on Bill page", () => {
       billBtn.addEventListener("click", handleclickNewBill);
       fireEvent.click(billBtn);
 
+      expect(handleclickNewBill).toHaveBeenCalled();
       expect(screen.getAllByText("Envoyer une note de frais")).toBeTruthy();
     })
   })
@@ -100,8 +158,7 @@ describe("Given I am connected as an employee and on Bill page", () => {
 // If click on eye icon, image should appear
 
 describe("When i click on the eye icon", () => {
-  test("A modal with an image should open", () => {
-
+  test("A modal with an image should open", () => { 
     const html = BillsUI({data: bills})
     document.body.innerHTML = html;
 
@@ -115,8 +172,6 @@ describe("When i click on the eye icon", () => {
       localStorage: window.localStorage,
     })
 
-    $.fn.modal = jest.fn();
-
     const eye = screen.getAllByTestId("icon-eye")[0];
 
     const handleClickIconEye = jest.fn(() => allBills.handleClickIconEye(eye))
@@ -124,13 +179,11 @@ describe("When i click on the eye icon", () => {
     eye.addEventListener("click", handleClickIconEye)
     fireEvent.click(eye);
 
-    const modale = document.getElementById("modaleFile")
+    const modaleFile = document.getElementById("modaleFile")
 
-    expect(modale).toBeTruthy();
+    expect(modaleFile).toBeTruthy();
   })
 })
-
-
 
 describe("Given I am a user connected as Employee", () => {
   describe("When I navigate to Bills UI", () => {

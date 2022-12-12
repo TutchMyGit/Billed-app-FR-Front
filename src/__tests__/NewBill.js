@@ -14,7 +14,6 @@ import fireStore from "../app/Store";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
 import Router from "../app/Router.js";
 
-
 import { localStorageMock } from "../__mocks__/localStorage.js";
 
 jest.mock("../app/Store");
@@ -55,7 +54,7 @@ describe("Given I am connected as an employee", () => {
 
       fireStore.bills = () => ({
         bills,
-        get: jest.fin().mockResolvedValue()
+        get: jest.fn().mockResolvedValue()
       });
 
       Object.defineProperty(window, "location", {value: {hash: pathname}});
@@ -176,17 +175,6 @@ describe("Given I am connected as an employee", () => {
 
 describe("Given when i am connect as employee", () => {
   describe('When i create a new bill', () => {
-    test("bill is added to API", () => {
-      const getSpy = jest.spyOn(firebase, "bills");
-
-      const billListUpdated = firebase.bills().update();
-      const billList = firebase.bills().list();
-      billListUpdated();
-
-      expect(getSpy).toHaveBeenCalled();
-      expect(billList.length).toBe(5);
-    });
-
     test("error while add bill and get error 404 message", async () => {
       firebase.bills().update(() =>
         Promise.reject(new Error("Erreur 404"))
